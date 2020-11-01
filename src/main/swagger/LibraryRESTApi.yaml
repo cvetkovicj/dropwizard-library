@@ -1,0 +1,293 @@
+openapi: 3.0.1
+info:
+  title: Library REST API
+  description: 'This is the specification for a REST API for Convey Library'
+  contact:
+    email: jcvetkovic85@gmail.com
+  version: 1.0.0
+servers:
+  - url: http://convey-library:8080/web/v1
+tags:
+  - name: LibraryAPI
+    description: All operations related to the Library
+paths:
+  /books:
+    get:
+      tags:
+        - get all books data
+      summary: get all books data
+      operationId: getBooks
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Books'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  status: "500"
+                  message: "There was an error processing your request. It has been logged (ID 15503f830b7cf428)."
+
+  /books/add:
+    post:
+      tags:
+        - add new book data
+      summary: add new book data
+      operationId: addBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                multipleErrors:
+                  value:
+                    code: 400,
+                    message: "numberOfPages may not be null"
+        409:
+          description: Duplicate unique value error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 409,
+                  message: "Duplicate constraint error."
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  status: "500"
+                  message: "There was an error processing your request. It has been logged (ID 15503f830b7cf428)."
+  /books/search:
+    post:
+      tags:
+        - search book by author and title
+      summary: search book data
+      operationId: searchBook
+      parameters:
+        - searchText
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Books'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 500
+                  message: "There was an error processing your request. It has been logged (ID 15503f830b7cf428)."
+
+  /book/{id}:
+    put:
+      tags:
+        - update Book data
+      summary: update book
+      operationId: update book
+      parameters:
+        - name: id
+          in: path
+          description: Id of the Book
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookUpdate'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                multipleErrors:
+                  value:
+                    code: 400,
+                    message: "numberOfPages may not be null"
+        404:
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 404,
+                  message: "Book does not exist."
+        409:
+          description: Duplicate unique value error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 409,
+                  message: "Duplicate constraint error."
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 500
+                  message: "There was an error processing your request. It has been logged (ID 15503f830b7cf428)."
+
+    delete:
+      tags:
+        - delete Book data
+      summary: delete book
+      operationId: delete book
+      parameters:
+        - name: id
+          in: path
+          description: Id of the Book
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: no content
+        404:
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 404,
+                  message: "Book does not exist."
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                value:
+                  code: 500
+                  message: "There was an error processing your request. It has been logged (ID 15503f830b7cf428)."
+
+components:
+  schemas:
+    Books:
+      type: array
+      items:
+        $ref: '#/components/schemas/Book'
+    Book:
+      type: object
+      required:
+        - id
+        - isbn
+        - title
+        - listOfAuthors
+        - genre
+        - numberOfPages
+      properties:
+        id:
+          type: integer
+          example: 1
+        isbn:
+          type: string
+          pattern: ^\d{3}\-\d{2}\-\d{3}\b (must be in format 3 digits - 2 digits - 3 digits)
+          example: "123-45-678"
+          maxLength: 10
+        title:
+          type: string
+          example: "Blindness"
+          maxLength: 50
+        listOfAuthors:
+          type: string
+          example: "Jose Saramago"
+          maxLength: 50
+        genre:
+          type: string
+          example: "Psychological Fiction"
+          maxLength: 30
+        numberOfPages:
+          type: integer
+          example: 324
+          maximum: 5000
+          minimum: 0
+
+    BookUpdate:
+      type: object
+      properties:
+        isbn:
+          type: string
+          pattern: ^\d{3}\-\d{2}\-\d{3}\b (must be in format 3 digits - 2 digits - 3 digits)
+          example: "123-45-678"
+          maxLength: 10
+        title:
+          type: string
+          example: "Blindness"
+          maxLength: 50
+        listOfAuthors:
+          type: string
+          example: "Jose Saramago"
+          maxLength: 50
+        genre:
+          type: string
+          example: "Psychological Fiction"
+          maxLength: 30
+        numberOfPages:
+          type: integer
+          maximum: 5000
+          minimum: 0
+          example: 324
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string

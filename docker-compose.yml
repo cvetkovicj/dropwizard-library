@@ -1,0 +1,78 @@
+version: '3.1'
+
+services:
+
+  server:
+    build: .
+    ports:
+      - 8080:8080
+    networks:
+      - main-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=server"
+      - "traefik.docker.network=main-network"
+      - "traefik.frontend.rule=PathPrefix:/books;ReplacePathRegex: ^/books(/|$$)(.*) /web/v1/books/$$2"
+      - "traefik.main.port=8080"
+      - "traefik.main.protocol=http"
+    depends_on:
+      - db
+
+  db:
+    build: ./database
+    restart: always
+    ports:
+      - 5432:5432
+    networks:
+      - main-network
+    environment:
+      POSTGRES_PASSWORD: password
+
+  client:
+    build: ./client
+    restart: always
+    ports:
+      - 81:80
+    networks:
+      - main-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=client"
+      - "traefik.docker.network=main-network"
+      - "traefik.frontend.rule=Host:convey-library"
+      - "traefik.main.port=80"
+      - "traefik.main.protocol=http"
+
+
+  lb-traefic:
+    image: traefik:1.6-alpine
+    ports:
+      - "80:80"
+      - "9999:8080"
+    networks:
+      - main-network
+    command:
+      - "--api"
+      - "--defaultentrypoints=http"
+      - "--loglevel=DEBUG"
+      - "--docker"
+      - "--docker.domain=convey-library"
+      - "--docker.watch"
+      - "--docker.exposedByDefault=false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        delay: 2s
+      placement:
+        constraints: [ node.role == manager ]
+
+
+networks:
+  main-network:
+    driver: overlay
+  logging-network:
+    driver: overlay
