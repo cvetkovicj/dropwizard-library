@@ -18,7 +18,7 @@
         :key="book.id"
       >
         <img
-          :src="index <= 4 ? `/icons/books/book-${index}.svg` : `/icons/books/book-${index - 4}.svg`"
+          :src="index <= 4 ? `/icons/books/book-${index}.svg` : `/icons/books/book-${index - Math.floor(index/5)*5}.svg`"
           alt="book"
         >
 
