@@ -21,7 +21,6 @@ public class Book {
     @Valid
     @Column(unique=true)
     @ValidISBNFormat
-    @Size(max = 10)
     public String isbn;
 
     @JsonProperty
