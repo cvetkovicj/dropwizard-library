@@ -4,7 +4,7 @@ An example Dropwizard application to demonstrate how to use Dropwizard using JDB
 Required installations
 ---
 Precondition to start application is to have Docker installed.
-Application will be build and run within Docker compose environment.
+Application will be built and run within Docker compose environment.
 According to your operating system follow the guidelines to install Docker Desktop.
 
 https://docs.docker.com/get-docker/
@@ -25,10 +25,10 @@ Once you have up and running Docker, to run application, execute following in th
 
 Docker compose will create 4 containers:
     
-    - dropwizard-library_server
-    - dropwizard-library_db
-    - traefik:1.6-alpine (proxy)
-    - dropwizard-library_client
+    - dropwizard-library_server_1
+    - dropwizard-library_client_1
+    - dropwizard-library_lb-traefic_1
+    - dropwizard-library_db_1
 
 Application is running on
 
